@@ -1,0 +1,847 @@
+<html>
+<head>
+	<style>
+		.content-section{
+			visibility: hidden;
+			display:none;
+			height:0;
+		}
+		.content-section.shown{
+			visibility: visible;
+			display:inherit;
+			height: auto;
+			width:640px;
+			margin:auto;
+			margin-top:40px;
+		}
+		a, button{
+			height: 40px;
+			width:150px;
+			background-color:#ffffff;
+			border-radius:5px;
+			border-color:#5588ff;
+		}
+		input[type="number"]{
+			width:55px;
+			border-color:#5588ff;
+		}
+		select {
+			border-color:#58f;
+		}
+		.left-panel{
+			width:300px;
+			float:left;
+			color:#36d;
+		}
+		.heading{
+			font-size:24px;
+			margin-bottom:15px;
+			color:#36d;
+		}
+		.subheading{
+			font-size:20px;
+			color:#36d;
+			margin-bottom:15px;
+		}
+		.right-panel{
+			width:300px;
+			float:right;
+			border-color:#5588ff;
+			position:relative;
+		}
+		.right-panel button{
+			margin:10px;
+		}
+		#about, #main-menu{
+			text-align:center;
+		}
+		#about, #main-menu div{
+			color:#36d;
+			margin-bottom:15px;
+		}
+		#main-menu .buttonholder{
+			margin-bottom:15px;
+			width:100%;
+		}
+		.nav{
+			text-align:center;
+		}
+		.nav button, #ap .nav select, .nav div{
+			margin:auto; 
+			width:145px;
+			margin-bottom:15px;
+			display:inline-block;
+			color:#000;
+		}
+		li div{
+			display:inline-block;
+			margin-left:5px;
+			margin-right:5px;
+			width:15px;
+			height:15px;
+		}
+		ul{
+			list-style-type:none;
+			padding:5px;
+			color:#000000;
+			border-color:#36d;
+			border-style:solid;
+			border-width:1px;
+			width:235px;
+		}
+		.x-label{
+			position:absolute;
+			top:180px;
+			transform:rotate(-90deg);
+		}
+		#rmp .x-label{
+			left:-40px;
+		}
+		#ap .x-label, #sap .x-label{
+			left:-60px;
+		}
+		.y-label{
+			position:absolute;
+			left:105px;
+			padding-top:5px;
+		}
+		td{
+			padding:5px;
+			text-align:center;
+		}
+		.tableheading{
+			margin-top:10px;
+			color:#000;
+		}
+		.left-table td{
+			text-align:left;
+			padding-top:0px;
+			padding-bottom:0px;
+		}
+		#sap .nav select{
+			margin-top:10px;
+			margin-bottom:10px;
+			margin-right:30px;
+		}
+		#helpdisplay{
+			position:fixed;
+			bottom:5px;
+			background-color:#fff;
+		}
+	</style>
+	<script type='text/javascript'>
+		var synapseLAB = function(){
+			var defaults = {
+				V0: 0,
+				m0: .0529254,
+				n0: .317675,
+				h0: .596242,
+				Na_o: 142,
+				Na_i: 10,
+				Na_g: 4,
+				K_o: 4,
+				K_i: 120,
+				K_g: 120,
+				Cl_i: 4,
+				Cl_o: 103,
+				Cl_g: 60,
+				Ca_i: .025,
+				Ca_o: 2.5,
+				Ca_g: 0,
+				T_C: 37,
+				amplitude: 10,
+				stim_time: 1,
+				no_pulse: 1,
+				spacing: 7,
+				sap_spacing: 50,
+				sap_length: 100
+			};
+			var maxMins = {
+				Na_o: [.01,1000],
+				Na_i: [.01,1000],
+				Na_g: [0,1000],
+				K_o: [.01,1000],
+				K_i: [.01,1000],
+				K_g: [0,1000],
+				Cl_i: [.01,1000],
+				Cl_o: [.01,1000],
+				Cl_g: [0,1000],
+				Ca_i: [.01,1000],
+				Ca_o: [.01,1000],
+				Ca_g: [0,1000],
+				T_C: [0, 100],
+				amplitude: [0, 25],
+				stim_time: [0, 50],
+				no_pulse: [0, 20],
+				spacing: [0, 100],
+				sap_spacing: [0, 100],
+				sap_length: [0, 100]
+			}
+			var axonProps = {
+				"Aa": { "speed" : 100, "nodelength" : 1, "internodelength" : 20, "dia" : 16.5, "unmyspd" : 1.25},
+				"Ab": { "speed" : 70.5, "nodelength" : 1, "internodelength" : 16.5, "dia" : 9, "unmyspd" : 1.25},
+				"Ag": { "speed" : 16.5, "nodelength" : 1, "internodelength" : 12.5, "dia" : 6.5, "unmyspd" : 1.25},
+				"Ad": { "speed" : 16.5, "nodelength" : 1, "internodelength" : 7.5, "dia" : 3, "unmyspd" : 1.25},
+				"B": { "speed" : 9, "nodelength" : 1, "internodelength" : 5, "dia" : 3, "unmyspd" : 1.25},
+				"C": { "speed" : 1.25, "nodelength" : 5, "internodelength" : 0, "dia" : 0.85, "unmyspd" : 1.25},
+			}
+			var axes = {
+				rmp: [[0, 40, 5], [-100, 130, 20]],
+				ap: function(endTime){return [[0, endTime, Math.max(1, Math.floor(endTime/10))], [-100, 70, 10]];},
+				sap: function (length){return [[0, length, 10],[-100, 70, 10]];}
+			};
+			var colors = {
+				rmp: ["#ee9900", "#ee4444", "#00eeee", "#00ff00", "#000000"],
+				ap: ["#000000", "#ee9900", "#ee4444", "#00ff00"],
+				sap: ["#000000", "#ee4444", "#ee4444"]
+			}
+			var rmp_points = [];
+			var ap_points = [];
+			var sap_points = [];
+			var sap_xs = [];
+			var sap_currtime = 0;
+			var sap_playing = false;
+			var sap_lock = -1;
+			function setVisible(sectionId){
+				document.getElementsByClassName('content-section shown')[0].classList.remove("shown");
+				document.getElementById(sectionId).classList.add('shown');
+			}	
+			
+			var integrate = function(){
+				function integrate(V0, m0, n0, h0, t0, tend, Iamp, Itime, Ispace, Ipulseno, Na_o, Na_i, Na_g, K_o, K_i, K_g, T_C, axonType){
+					var resting = util.restingV(Na_o, Na_i, Na_g, K_o, K_i, K_g, T_C);
+					var t = t0;
+					var step = .01;
+					var output = [[t,V0,m0,n0,h0, 0]];
+					while (t < tend){
+						var lastPt = output[output.length - 1];
+						var I = I_t(Iamp, Itime, Ispace, Ipulseno, t-t0);
+						var temp = Xdot(t, I, lastPt[1], lastPt[2], lastPt[3], lastPt[4], resting, axonType);
+						temp[1] = lastPt[1] + step/2*temp[1];
+						temp[2] = lastPt[2] + step/2*temp[2];
+						temp[3] = lastPt[3] + step/2*temp[3];
+						temp[4] = lastPt[4] + step/2*temp[4];
+						I = I_t(Iamp, Itime, Ispace, Ipulseno, t - t0 + step/2);
+						var temp2 = Xdot(t + step/2, I, temp[1], temp[2], temp[3], temp[4], resting, axonType);
+						t += step;
+						output.push([t, step* temp2[1] + lastPt[1], step* temp2[2] + lastPt[2], step* temp2[3] + lastPt[3], step* temp2[4] + lastPt[4], I]);
+					}
+					return output;
+				}
+				function I_t(Iamp, Itime, Ispace, Ipulseno, t){
+					if (t < 5 || t > (Ipulseno * (Itime + Ispace) + 5)) return 0;
+					var phase = (t-5)/(Itime+Ispace);
+					if ((phase - Math.floor(phase))*(Itime + Ispace) < Itime) return Iamp;
+					return 0;
+				}	
+				function Xdot(t, I_t, V, m, n, h, restingV, axonType){
+					//return [t, 3*Math.pow(t, 2), 2*V, 2, 0];
+					return [t, 
+						I_t - (36*Math.pow(n, 4)*(V-restingV.vK) + 120*Math.pow(m, 3)*h*(V-restingV.vNa) + .3*(V-restingV.vL)),
+						mdot(V, m, axonType),
+						ndot(V, n, axonType),
+						hdot(V, h, axonType)
+						];
+				}
+				function mdot(V, m, axonType){
+					switch(axonType){
+						case "normal":
+						case "inactiveblock":
+						case "kblock":
+						default:
+							return .1*(25-V)/(Math.exp((25-V)/10) - 1) * (1-m) - 4 * Math.exp(V/-18) * m;
+							break;
+						case "activeblock":
+							return -4 * Math.exp(V/-18) * m;
+							break;
+						/*case "Aa":
+							return .001*.1*(25-V)/(Math.exp((25-V)/10) - 1) * (1-m) - 4 * Math.exp(V/-18) * m;
+							break;
+						case "Ab":
+							return .01*.1*(25-V)/(Math.exp((25-V)/10) - 1) * (1-m) - 4 * Math.exp(V/-18) * m;
+							break;
+						case "Ag":
+							return .05*.1*(25-V)/(Math.exp((25-V)/10) - 1) * (1-m) - 4 * Math.exp(V/-18) * m;
+							break;
+						case "Ad":
+							return .1*.1*(25-V)/(Math.exp((25-V)/10) - 1) * (1-m) - 4 * Math.exp(V/-18) * m;
+							break;*/
+					}
+				}
+				function ndot(V, n, axonType){
+					switch(axonType){
+						case "kblock":
+							return -.125 * Math.exp(V/-80)*n;
+							break;
+						default:
+							return .01 * (10 - V)/(Math.exp((10-V)/10) - 1)*(1-n) - .125 * Math.exp(V/-80)*n;
+							break;
+					}
+				}
+				function hdot(V, h, axonType){
+					switch (axonType){
+						case "inactiveblock":
+							return -1/(Math.exp((30-V)/10) + 1)*h;
+							break;
+						default:
+							return .07*Math.exp(V/-20)*(1-h) - 1/(Math.exp((30-V)/10) + 1)*h;
+							break;
+					}
+				}
+				return integrate;
+			}();
+			
+			var util = {
+				restingV: function (Na_o, Na_i, Na_g, K_o, K_i, K_g, T_C){
+					var rt = (273.15 + T_C)*(-.198447);
+					var rmp = rt * Math.log10((Na_i*Na_g + K_i*K_g)/(Na_o*Na_g + K_o*K_g));
+					var vNa = rt * Math.log10(Na_i/Na_o) - rmp;
+					var vK = rt * Math.log10(K_i/K_o) - rmp;
+					var vL = (vNa * .01060709 + vK * .3666356)/-.3;
+					return {
+						rmp: rmp,
+						vNa: vNa,
+						vK: vK,
+						vL: vL
+					};
+				}	
+			}
+			
+			function draw(points, canvasId, timeFunction, functionsOfPoints, maxMinSpace, colors){
+				var c = document.getElementById(canvasId);
+				var xOne = c.width / (maxMinSpace[0][1] - maxMinSpace[0][0]);
+				var yOne =  c.height / (maxMinSpace[1][1] - maxMinSpace[1][0]);
+				var ctx = c.getContext("2d");
+				
+				ctx.clearRect(0, 0, c.width, c.height);
+				ctx.beginPath();
+				ctx.stroke();
+				
+				//gridlines and labels
+				for (var x = maxMinSpace[0][0] + maxMinSpace[0][2]; x < maxMinSpace[0][1]; x+= maxMinSpace[0][2]){
+					ctx.beginPath();
+					ctx.moveTo((x - maxMinSpace[0][0])*xOne, c.height);
+					ctx.lineTo((x - maxMinSpace[0][0])*xOne, 0);
+					ctx.strokeStyle = "#eeeeee";
+					ctx.stroke();
+					ctx.beginPath();
+					ctx.strokeStyle = "#000000";
+					ctx.strokeText(x,(x - maxMinSpace[0][0])*xOne - 3, c.height - 2);
+				}
+				for (var y = maxMinSpace[1][0] + maxMinSpace[1][2]; y < maxMinSpace[1][1]; y+= maxMinSpace[1][2]){
+					ctx.beginPath();
+					ctx.moveTo(0, c.height - (y - maxMinSpace[1][0])*yOne);
+					ctx.lineTo(c.width, c.height - (y - maxMinSpace[1][0])*yOne);
+					ctx.strokeStyle = "#eeeeee";
+					ctx.stroke();
+					ctx.beginPath();
+					ctx.strokeStyle = "#000000";
+					ctx.strokeText(y, 1, c.height - (y - maxMinSpace[1][0])*yOne + 3);
+				}
+				
+				var t;
+				for (var i = 0; i < functionsOfPoints.length; i++){
+					ctx.beginPath();
+					t = 0;
+					ctx.moveTo((timeFunction(points, t) - maxMinSpace[0][0]) * xOne, c.height - (functionsOfPoints[i](points[0]) - maxMinSpace[1][0]) * yOne);
+					while (t < points.length){
+						ctx.lineTo((timeFunction(points, t) - maxMinSpace[0][0]) * xOne, c.height - (functionsOfPoints[i](points[t]) - maxMinSpace[1][0]) * yOne);
+						t++;
+					}
+					ctx.strokeStyle = colors[i];
+					ctx.stroke(); 
+				}
+			}
+			function getValueById(id){
+				return document.getElementById(id).value;
+			}
+			
+			function rmp_voltages(){
+				var output = [];
+				var ions = ['Na', 'K', 'Cl', 'Ca'];
+				var dividers = [1,1,-1,2];
+				var rt = (273.15 + 37)*(-.198447);
+				for (var i = 0; i < 4; i++){
+					output[i] = rt * Math.log10(getValueById("rmp_" + ions[i] + "_i")/ getValueById("rmp_" + ions[i] + "_o"));
+				}
+				output[4] = rt*Math.log10((getValueById("rmp_Na_i") * getValueById("rmp_Na_g") + getValueById("rmp_K_i") * getValueById("rmp_K_g") + getValueById("rmp_Cl_o")*getValueById("rmp_Cl_g") + getValueById("rmp_Ca_i")*getValueById("rmp_Ca_g"))/
+				(getValueById("rmp_Na_o") * getValueById("rmp_Na_g") + getValueById("rmp_K_o") * getValueById("rmp_K_g") + getValueById("rmp_Cl_i")*getValueById("rmp_Cl_g") + getValueById("rmp_Ca_o")*getValueById("rmp_Ca_g")));
+				
+				document.getElementById("rmp_Na_disp").innerHTML = Math.floor(output[0]);
+				document.getElementById("rmp_K_disp").innerHTML = Math.floor(output[1]);
+				document.getElementById("rmp_Cl_disp").innerHTML = Math.floor(output[2]);
+				document.getElementById("rmp_Ca_disp").innerHTML = Math.floor(output[3]);
+				document.getElementById("rmp_mp_disp").innerHTML = Math.floor(output[4]);
+				
+				return output;
+			}
+			function ap_stimulate(){
+				var starting;
+				if (document.getElementById("ap_append").checked && ap_points.length > 0){
+					starting = ap_points[ap_points.length-1];
+				} else {
+					starting = [0, defaults.V0, defaults.m0, defaults.n0, defaults.h0];
+				}
+				var endTime = 5 + (getValueById("ap_time") + getValueById("ap_spacing"))*getValueById("ap_no_pulse") + starting[0];
+				var newPoints = integrate(starting[1], starting[2], starting[3], starting[4], starting[0], endTime, getValueById("ap_amplitude"), getValueById("ap_time"), getValueById("ap_spacing"), getValueById("ap_no_pulse"),
+					getValueById("ap_Na_o"), getValueById("ap_Na_i"), getValueById("ap_Na_g"), getValueById("ap_K_o"), getValueById("ap_K_i"), getValueById("ap_K_g"), 37, getValueById("ap_blockers"));
+				if (document.getElementById("ap_append").checked){
+					ap_points = ap_points.concat(newPoints);
+				} else {
+					ap_points = newPoints;
+				}
+				draw(ap_points, 'drawspaceap', function(pt, t){return pt[t][0];}, 
+					[function(pt){return pt[1] + util.restingV(getValueById("ap_Na_o"), getValueById("ap_Na_i"), getValueById("ap_Na_g"), getValueById("ap_K_o"), getValueById("ap_K_i"), getValueById("ap_K_g"), 37)["rmp"];}, 
+						function(pt){return 120*Math.pow(pt[2],3)*pt[4];}, 
+						function(pt){return 36*Math.pow(pt[3],4);}, 
+						function(pt){return pt[5];}],
+					axes["ap"](endTime), colors["ap"]);
+				
+				var csv = ["Time (ms),Voltage (mV),Na conductance, K conductance, Stimulus (mA)"];
+				for (var i = 0; i < ap_points.length; i++){
+					var temp = [];
+					temp.push(ap_points[i][0]);
+					temp.push(ap_points[i][1]);
+					temp.push(120*Math.pow(ap_points[i][2],3)*ap_points[i][4]);
+					temp.push(36*Math.pow(ap_points[i][3],4));
+					temp.push(ap_points[i][5]);
+					csv.push(temp.join(","));
+				}
+				var data = csv.join("\n");
+				var csvData = new Blob([data], { type: 'text/csv' }); 
+				var csvUrl = URL.createObjectURL(csvData);
+				var link = document.getElementById('ap_export');
+				link.setAttribute('href', csvUrl);
+			}
+			
+			var sap_stimulate = function(){
+				function sap_stimulate(){
+					sap_points = [];
+					var axonType = getValueById("sap_axons");
+					var props = axonProps[axonType];
+					var starting = [0, defaults.V0, defaults.m0, defaults.n0, defaults.h0];
+					var endTime = 5 + (getValueById("sap_time") + getValueById("sap_spacing"))*getValueById("sap_no_pulse");
+					endTime += getValueById("sap_length") / (props.speed * props.internodelength + props.unmyspd * props.nodelength) * (props.internodelength + props.nodelength);
+					var x0 = integrate(starting[1], starting[2], starting[3], starting[4], 0, endTime, getValueById("sap_amplitude"), getValueById("sap_time"), getValueById("sap_spacing"), getValueById("sap_no_pulse"),
+						getValueById("sap_Na_o"), getValueById("sap_Na_i"), getValueById("sap_Na_g"), getValueById("sap_K_o"), getValueById("sap_K_i"), getValueById("sap_K_g"), 37, axonType);
+					var vOnly = [];
+					for (var i = 0; i < x0.length; i++){
+						vOnly.push(x0[i][1]);
+					}
+					sap_points.push(vOnly);
+					sap_xs = [0];
+					
+					//extend over the rest of the axon
+					sap_shiftIN(axonType);
+					var x = axonProps[axonType].internodelength;
+					while (x < getValueById("sap_length")){
+						sap_shiftN(axonType);
+						sap_shiftIN(axonType);
+						x += axonProps[axonType].internodelength + axonProps[axonType].nodelength;
+					}
+					
+					var csv = ["X (um) \ t (ms)"];
+					for (var t = 0; t < vOnly.length; t++){
+						csv.push(t/100);
+					}
+					var rows = [csv.join(",")];
+					for (var x = 0; x < sap_points.length; x+=10){
+						rows.push(([sap_xs[x]].concat(sap_points[x])).join(","));
+					}
+					var data = rows.join("\n");
+					var csvData = new Blob([data], { type: 'text/csv' }); 
+					var csvUrl = URL.createObjectURL(csvData);
+					var link = document.getElementById('sap_export');
+					link.setAttribute('href', csvUrl);
+					
+					//trigger a play
+					if (!sap_playing){
+						sap_playing = true;
+					} else {
+						clearTimeout(sap_lock);
+					}
+					playSap(0);	
+				}
+				function sap_shiftIN(axonType){
+					var props = axonProps[axonType];
+					if (props.internodelength == 0) return;
+					for (var j = 0;j < 100; j++){
+						sap_xs.push(sap_xs[sap_xs.length-1] + props.internodelength/100);
+						var decay = sap_points[sap_points.length-1];
+						for (var k = 0; k < decay.length; k++){
+							decay[k] = decay[k] * .993;
+						}
+						sap_points.push(padZeros(decay, props.internodelength / props.speed * 10)); //fudge of 10 to slow things down so we can see...; this fn assumes we are splitting the node or internode into 100 
+					}
+				}
+				function sap_shiftN(axonType){
+					//got to reinitialize, assume that the AP will start once you hit -40mV on the previous X
+					//also recall that the stimulus won't start at x=0 for 5 sec 
+					var props = axonProps[axonType];
+					var previous = sap_points[sap_points.length-1];
+					var idx = -1;
+					if (props.internodelength != 0){ //all this special casing for C
+						for (var j = 0; j < previous.length; j++){
+							if (previous[j] > 30) { //account for -70mV resting voltage
+								idx = j; 
+								break;
+							}
+						}
+						
+						var next;
+						if (idx == -1){ //should never happen, but maybe bad QA...
+							next = padZeros([], previous.length);
+						} else {
+							next = padZeros(sap_points[0], idx - 500);
+						}
+						sap_points.push(next);
+						sap_xs.push(sap_xs[sap_xs.length-1] + props.nodelength/100);
+					}
+					
+					for (var j = 1; j < 10; j++){
+						sap_points.push(padZeros(sap_points[sap_points.length-1], props.nodelength / props.unmyspd * 10));
+						sap_xs.push(sap_xs[sap_xs.length-1] + props.nodelength/10);
+					}
+				}
+				function padZeros(orig, numZeros){
+					var arr = [];
+					for (var i = 0; i<numZeros; i++){
+						arr.push(0);
+					}
+					return arr.concat(orig).splice(0, orig.length);
+				}
+				function playSap(t){
+					if (t < sap_points[0].length && sap_playing){
+						drawSap(t/100);
+						sap_lock = setTimeout(function(){playSap(t+100);}, 100);
+					} else {
+						sap_playing = false;
+					}
+					if (sap_playing){
+							document.getElementById("sap_play").innerHTML = "Pause";
+					} else {
+						document.getElementById("sap_play").innerHTML = "Play";
+					}
+				}
+				function drawSap(time){
+					if (time < 0 || time > sap_points[0].length / 100) return; //out of bounds
+					var props = axonProps[getValueById("sap_axons")];
+					var flipped = sap_points.map(function(value, idx){ return [sap_xs[idx], value[Math.floor(time * 100)] 
+						+ util.restingV(getValueById("sap_Na_o"), getValueById("sap_Na_i"), getValueById("sap_Na_g"), getValueById("sap_K_o"), getValueById("sap_K_i"), getValueById("sap_K_g"), 37)["rmp"] /*V*/]; });
+					draw(flipped, "drawspacesap", function(pts, t){return pts[t][0];}, 
+						[function(pt){ return pt[1];}, function(pt){ return pt[0]%(props.internodelength + props.nodelength) > props.internodelength ?  .85 : props.dia; }, function(pt){ return pt[0]%(props.internodelength + props.nodelength) > props.internodelength ?  -0.85 : -1*props.dia; }], 
+						axes["sap"](getValueById("sap_length")), colors["sap"]);
+					document.getElementById("sap_play_time").innerHTML = "Time (ms) : " + Math.floor(time);
+					sap_currtime = time;
+				}
+				function playPauseSap(){
+					if (sap_points.length == 0){
+						return;
+					}
+					if (sap_playing){
+						sap_playing = false; //will interrupt play
+					} else {
+						sap_playing = true;
+						playSap(sap_currtime * 100);
+					}
+				}
+				return {
+					sap_stimulate: sap_stimulate,
+					playPauseSap: playPauseSap
+				};
+			}();
+			
+			var init = function(){
+				function reset_defaults(){
+					var elems = document.querySelectorAll('input[type=number]');
+					for (var i=0; i<elems.length;i++){
+						if (elems[i].attributes["data-default"] != undefined){
+							elems[i].value = defaults[elems[i].attributes["data-default"].value];
+						}
+					}
+				}
+				function setupHelp(){
+					var elems = document.querySelectorAll('[data-help]');
+					for (var i = 0; i < elems.length; i++){
+						elems[i].onmouseenter = function(evt){
+							document.getElementById('helpdisplay').innerHTML = evt.currentTarget.attributes["data-help"].value;
+						}
+						elems[i].onmouseleave = function(){
+							document.getElementById('helpdisplay').innerHTML = "";
+						}
+					}
+				}
+				function setupOnclicks(){
+					var elems = document.querySelectorAll('[data-setVisible]');
+					for (var i = 0; i < elems.length; i++){
+						elems[i].onclick = function(evt){
+							setVisible(evt.currentTarget.attributes["data-setVisible"].value);
+						}
+					}
+					
+					var elems = document.querySelectorAll('.default');
+					for (var i = 0; i < elems.length; i++){
+						elems[i].onclick = function(){ reset_defaults(); }
+					}
+					
+					document.getElementById("sap_play").onclick = sap_stimulate.playPauseSap;
+					document.getElementById("sap_stimulate").onclick = sap_stimulate.sap_stimulate;
+					document.getElementById("ap_stimulate").onclick = ap_stimulate;
+				}
+				function setupMaxMin(){
+					var elems = document.querySelectorAll('input[type=number]');
+					for (var i=0; i<elems.length;i++){
+						if (elems[i].attributes["data-default"] != undefined){
+							elems[i].onchange = function(evt){
+								var target = evt.target;
+								var thisminmax = maxMins[evt.target.attributes["data-default"].value];
+								if (target.value > thisminmax[1]) {
+									target.value = thisminmax[1];
+								} else if (target.value < thisminmax[0]){
+									target.value = thisminmax[0];
+								}
+							}
+						}
+					}
+				}
+				function init(){
+				//set up default values
+				reset_defaults();
+				
+				//set up events
+				setupMaxMin();
+				setupHelp();
+				setupOnclicks();
+				
+				//set up scrolling graph for rmp
+				setInterval(function(){
+					if (document.getElementsByClassName('content-section shown')[0].id == "rmp"){
+						rmp_points[rmp_points.length] = rmp_voltages();
+						if (rmp_points.length > 40){
+							rmp_points.splice(0,1);
+						}
+						draw(rmp_points, 'drawspacermp', function(pts, time){return time;}, 
+							[function(point){return point[0];}, function(point){return point[1];}, function(point){return point[2];}, function(point){return point[3];}, function(point){return point[4];}],
+							axes["rmp"], colors["rmp"]);
+					}
+				}, 1000);
+				
+				document.getElementById("sap_axons").onchange = function(){ 
+					if (sap_playing) sap_playing= false;
+					sap_points = [];
+				};
+			}
+				
+				return init;
+			}();
+			
+			return init;
+		}();
+		</script>
+</head>
+<body onload="synapseLAB()">
+	<div class='content-section shown' id='front-panel'>
+		<div class="left-panel">
+			<div class="heading">SynapseLAB v2.0</div>
+			<div> Neuron simulation for medical education.</div>
+			<div>Written By:</div>
+			<div>Manika Paul, CNUCOM 2020</div>
+			<div>Dr. Jose Puglisi</div>
+		</div>
+		<div class="right-panel">
+			<button data-setVisible="main-menu">Begin</button>
+			<button data-setVisible="about">About</button>
+		</div>
+	</div>
+	<div class='content-section' id='about'>
+		<div class="heading">About SynapseLAB</div>
+		<div>
+			<div>SynapseLAB is a neuron simulation program covering neuroscience concepts from resting membrane potentials to spatial-temporal summation and action potentials. It was developed for use in instruction at the California Northstate University College of Medicine.</div>
+			<div></div>
+			<div>Writers: Manika Paul, c/o 2020; Dr. Jose Puglisi</div>
+			<div>Special thanks to Dr. For-shing Lui and Dr. Nena Mason for their advice and input on this project.</div>
+		</div>
+		<button data-setVisible='front-panel'>Back</button>
+	</div>
+	<div class='content-section' id='main-menu'>
+		<div>
+			<div class="heading">SynapseLAB</div>
+			<div class="subheading">Pick a module to continue.</div>
+			<div class="buttonholder"><button data-setVisible='rmp'>Nernst and Resting Membrane Potentials</button></div>
+			<div class="buttonholder"><button data-setVisible='ap'>Action Potentials</button></div>
+			<div class="buttonholder"><button data-setVisible='sap'>Spatial Action Potentials</button></div>
+			<div class="buttonholder"><button data-setVisible='front-panel'>Back</button></div>
+		</div>
+	</div>
+	<div class='content-section' id='rmp'>
+		<div class="heading">Nernst and Resting Membrane Potentials Module</div>
+		<div class="left-panel">
+			<div class="subheading">SynapseLAB</div>
+			<div>
+				<table data-help="Manually change the given ion's concentration on the inside or outside of the membrane, or its permeability.">
+					<tr>
+						<td></td><td>[In] mM</td><td>[Out] mM</td><td>g</td>
+					</tr>
+					<tr>
+						<td>Na</td><td><input type="number" data-default="Na_i" id="rmp_Na_i" step="any"/></td><td><input type="number" step="any" data-default="Na_o" id="rmp_Na_o"/></td><td><input type="number" step="any" data-default="Na_g" id="rmp_Na_g"/></td>
+					</tr>
+					<tr>
+						<td>K</td><td><input type="number" data-default="K_i" id="rmp_K_i" step="any"/></td><td><input type="number" step="any" data-default="K_o" id="rmp_K_o"/></td><td><input type="number" step="any" data-default="K_g" id="rmp_K_g"/></td>
+					</tr>
+					<tr>
+						<td>Cl</td><td><input type="number"  data-default="Cl_i" id="rmp_Cl_i" step="any"/></td><td><input type="number" step="any" data-default="Cl_o" id="rmp_Cl_o"/></td><td><input type="number" step="any" data-default="Cl_g" id="rmp_Cl_g"/></td>
+					</tr>
+					<tr>
+						<td>Ca</td><td><input type="number" data-default="Ca_i" id="rmp_Ca_i" step="any"/></td><td><input type="number" step="any" data-default="Ca_o" id="rmp_Ca_o"/></td><td><input type="number" step="any" data-default="Ca_g" id="rmp_Ca_g"/></td>
+					</tr>
+				</table>
+				<!--<input type="number" id="rmp_T_C" data-default="T_C" data-help="Change the membrane temperature."/>-->
+				<ul data-help="Displays the current Nernst potentials of a given ion and the overall membrane potential.">
+					<li><div style="background-color:#ee9900"></div>Na Nernst potential (mV) <div id="rmp_Na_disp"></div></li>
+					<li><div style="background-color:#ee4444"></div>K Nernst potential (mV) <div id="rmp_K_disp"></div></li>
+					<li><div style="background-color:#00eeee"></div>Cl Nernst potential (mV) <div id="rmp_Cl_disp"></div></li>
+					<li><div style="background-color:#00ff00"></div>Ca Nernst potential (mV) <div id="rmp_Ca_disp"></div></li>
+					<li> <div style="background-color:#000000"></div>Membrane potential (mV)<div id="rmp_mp_disp"></div></li>
+				</ul>
+			</div>					
+		</div>
+		<div class="right-panel">
+			<div class="nav">
+				<button class="default" data-help="Sets all ion concentrations and permeabilities back to default.">Default</button>
+				<button data-setVisible='main-menu' data-help="Return to the main menu to pick a different module.">Exit</button>
+			</div>
+			<canvas width=300 height=300 id='drawspacermp' data-help="Displays the last several seconds of Nernst and membrane potentials."></canvas>
+			<div class="x-label">Time (s)</div>		
+			<div class="y-label">Voltage (mV)</div>
+		</div>
+	</div>
+	<div class='content-section' id='ap'>
+		<div class="heading">Action Potential Module</div>
+		<div class="left-panel">
+		<div class="subheading">SynapseLAB</div>
+			<table data-help="Manually change the given ion's concentration on the inside or outside of the membrane, or its permeability.">
+				<tr>
+					<td></td><td>[In] mM</td><td>[Out] mM</td><td>g</td>
+				</tr>
+				<tr>
+					<td>Na</td><td><input type="number" data-default="Na_i" id="ap_Na_i" step="any"/></td><td><input type="number" step="any" data-default="Na_o" id="ap_Na_o"/></td><td><input type="number" step="any" data-default="Na_g" id="ap_Na_g"/></td>
+				</tr>
+				<tr>
+					<td>K</td><td><input type="number" data-default="K_i" id="ap_K_i" step="any"/></td><td><input type="number" step="any" data-default="K_o" id="ap_K_o"/></td><td><input type="number" step="any" data-default="K_g" id="ap_K_g"/></td>
+				</tr>
+			</table>
+			<!--<input type="number" id="ap_T_C" data-default="T_C" data-help="Change the membrane temperature."/><label for="ap_T_C">Temperature (C)</label>-->
+			<div class="tableheading">Applied Current</div>
+			<table class="left-table">
+				<tr>
+					<td data-help="Change the amplitude of the applied stimulus.">Amplitude (mA) </td><td data-help="Change the amount of time the stimulus is applied for.">Time (ms)</td>
+				</tr>
+				<tr>
+					<td data-help="Change the amplitude of the applied stimulus."> <input type="number" data-default="amplitude" id="ap_amplitude" step="any"/></td><td data-help="Change the amount of time the stimulus is applied for."><input type="number" step="any" data-default="stim_time" id="ap_time"/></td>
+				</tr>
+				<tr><td></td><td></td></tr>
+				<tr>
+					<td data-help="Change the number of times a stimulus is applied.">Number of pulses</td><td data-help="Change the amount of time the applied current is held at 0 after a stimulus.">Spacing (ms)</td>
+				</tr>
+				<tr>
+					<td data-help="Change the number of times a stimulus is applied."><input type="number" data-default="no_pulse" id="ap_no_pulse" step="any"/></td><td data-help="Change the amount of time the applied current is held at 0 after a stimulus."><input type="number" step="any" data-default="spacing" id="ap_spacing"/></td>
+				</tr>
+			</table>
+			<div class="tableheading"></div>
+			<div class="nav">
+				<select id="ap_blockers" data-help="Completely blocks the specified type of channel.">
+					<option value="normal" selected="selected">Normal axon</option>
+					<option value="activeblock">Active NaC blocker</option>
+					<option value="inactiveblock">Inactive NaC blocker</option>
+					<option value="kblock">K channel blocker</option>
+				</select>
+				<div data-help="If this is on, clicking Stimulate will add the calculated membrane voltage trace to the previous trace.">Append?<input type="checkbox" id="ap_append"/></div>
+			</div>
+			<div class="nav">
+				<button id="ap_stimulate" data-help="Applies the stimulus to the membrane and plots it on the graph.">Stimulate</button>
+				<a id="ap_export" download="ActionPotential.csv" href="" data-help="Exports the trace on the graph to a csv file."><button>Export to Excel</button></a>
+			</div>
+			
+			<ul>
+				<li><div style="background-color:#000000"></div>Voltage (mV)</li>
+				<li><div style="background-color:#ee9900"></div>Sodium conductance </li>
+				<li><div style="background-color:#ee4444"></div>Potassium conductance </li> 
+				<li><div style="background-color:#00ff00"></div>Stimulus (mA) </li>
+			</ul>
+		</div>
+		<div class="right-panel">
+			<div class="nav">
+				<button class="default" data-help="Sets all ion concentrations and permeabilities back to default.">Default</button>
+				<button data-setVisible='main-menu' data-help="Return to the main menu to pick a different module.">Exit</button>
+			</div>
+			<canvas width=300 height=300 id='drawspaceap' data-help="Displays the membrane voltage, sodium and potassium conductances, and the applied stimulus on the graph."></canvas>
+			<div class="x-label">Distance (um)</div>		
+			<div class="y-label">Voltage (mV)</div>	
+		</div>
+	</div>
+	<div class='content-section' id='sap'>
+		<div class="heading">Spatial Potential Module</div>
+		<div class="left-panel">
+			<div class="subheading">SynapseLAB</div>
+			<table  data-help="Manually change the given ion's concentration on the inside or outside of the membrane, or its permeability.">
+				<tr>
+					<td></td><td>[In] mM</td><td>[Out] mM</td><td>g</td>
+				</tr>
+				<tr>
+					<td>Na</td><td><input type="number" data-default="Na_i" id="sap_Na_i" step="any"/></td><td><input type="number" step="any" data-default="Na_o" id="sap_Na_o"/></td><td><input type="number" step="any" data-default="Na_g" id="sap_Na_g"/></td>
+				</tr>
+				<tr>
+					<td>K</td><td><input type="number" data-default="K_i" id="sap_K_i" step="any"/></td><td><input type="number" step="any" data-default="K_o" id="sap_K_o"/></td><td><input type="number" step="any" data-default="K_g" id="sap_K_g"/></td>
+				</tr>
+			</table>
+			<!--<input type="number" id="sap_T_C" data-default="T_C" data-help="Change the membrane temperature."/><label for="sap_T_C">Temperature (C)</label>-->
+			
+			<div class="tableheading">Applied Current</div>
+			<table class="left-table">
+				<tr>
+					<td data-help="Change the amplitude of the applied stimulus.">Amplitude (mA) </td><td data-help="Change the amount of time the stimulus is applied for.">Time (ms)</td>
+				</tr>
+				<tr>
+					<td data-help="Change the amplitude of the applied stimulus."><input type="number" data-default="amplitude" id="sap_amplitude" step="any"/></td><td data-help="Change the amount of time the stimulus is applied for."><input type="number" step="any" data-default="stim_time" id="sap_time"/></td>
+				</tr>
+				<tr><td></td><td></td></tr>
+				<tr>
+					<td data-help="Change the number of times a stimulus is applied.">Number of pulses</td><td data-help="Change the amount of time the applied current is held at 0 after a stimulus.">Spacing (ms)</td>
+				</tr>
+				<tr>
+					<td data-help="Change the number of times a stimulus is applied."><input type="number" data-default="no_pulse" id="sap_no_pulse" step="any"/></td><td data-help="Change the amount of time the applied current is held at 0 after a stimulus."><input type="number" step="any" data-default="sap_spacing" id="sap_spacing"/></td>
+				</tr>
+			</table>
+			<div class="nav">
+				<select id="sap_axons" data-help="Changes between the types of myelin sheaths found normally in the body.">
+					<option value="Aa" selected="selected">A-alpha</option>
+					<option value="Ab">A-beta</option>
+					<option value="Ag">A-gamma</option>
+					<option value="Ad">A-delta</option>
+					<option value="B">B</option>
+					<option value="C">C</option>
+				</select>
+				<label for="sap_length">Axon length (um):</label><input type="number" id="sap_length" data-default="sap_length" data-help="Change the total length of the axon."/>
+			</div>
+			<div class="nav">
+				<button id="sap_stimulate" data-help="Applies the stimulus to the membrane and plots it on the graph.">Stimulate</button>
+				<a id="sap_export" download="SpatialActionPotential.csv" href="" data-help="Exports the voltage values across time and space as a csv file."><button>Export to Excel</button></a>
+			</div>
+			<div class="nav">
+				<button id="sap_play" data-help="Starts or pauses playback of the voltage along the axon over time.">Play</button>
+				<div id="sap_play_time">Time (ms): 0</div>
+			</div>
+		</div>
+		<div class="right-panel">
+			<div class="nav">
+				<button class="default" data-help="Sets all ion concentrations and permeabilities back to default.">Default</button>
+				<button data-setVisible='main-menu' data-help="Return to the main menu to pick a different module.">Exit</button>
+			</div>
+			<canvas width=300 height=300 id='drawspacesap' data-help="Displays the membrane voltage along the length of the axon, overlaid on the axon, at the time shown to the left."></canvas>
+			<div class="x-label">Distance (um)</div>		
+			<div class="y-label">Voltage (mV)</div>	
+		</div>
+	</div>
+	<div id="helpdisplay"></div>	
+</body>
+</html>
