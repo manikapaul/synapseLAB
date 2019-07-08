@@ -89,18 +89,18 @@
 			border-width:1px;
 			width:235px;
 		}
-		.x-label{
+		.y-label{
 			position:absolute;
 			top:180px;
 			transform:rotate(-90deg);
 		}
-		#rmp .x-label{
+		#rmp .y-label{
 			left:-40px;
 		}
-		#ap .x-label, #sap .x-label{
+		#ap .y-label, #sap .y-label{
 			left:-60px;
 		}
-		.y-label{
+		.x-label{
 			position:absolute;
 			left:105px;
 			padding-top:5px;
@@ -186,7 +186,7 @@
 				"C": { "speed" : 1.25, "nodelength" : 5, "internodelength" : 0, "dia" : 0.85, "unmyspd" : 1.25},
 			}
 			var axes = {
-				rmp: [[0, 40, 5], [-100, 130, 20]],
+				rmp: [[0, 40, 5], [-110, 130, 20]],
 				ap: function(endTime){return [[0, endTime, Math.max(1, Math.floor(endTime/10))], [-100, 70, 10]];},
 				sap: function (length){return [[0, length, 10],[-100, 70, 10]];}
 			};
@@ -221,7 +221,6 @@
 						temp[2] = lastPt[2] + step/2*temp[2];
 						temp[3] = lastPt[3] + step/2*temp[3];
 						temp[4] = lastPt[4] + step/2*temp[4];
-						I = I_t(Iamp, Itime, Ispace, Ipulseno, t - t0 + step/2);
 						var temp2 = Xdot(t + step/2, I, temp[1], temp[2], temp[3], temp[4], resting, axonType);
 						t += step;
 						output.push([t, step* temp2[1] + lastPt[1], step* temp2[2] + lastPt[2], step* temp2[3] + lastPt[3], step* temp2[4] + lastPt[4], I]);
@@ -353,7 +352,9 @@
 				}
 			}
 			function getValueById(id){
-				return document.getElementById(id).value;
+				var val = document.getElementById(id).value;
+				if (!!parseFloat(val) || parseFloat(val) == 0){ return parseFloat(val); }
+				else { return val; }
 			}
 			
 			function rmp_voltages(){
@@ -382,7 +383,7 @@
 				} else {
 					starting = [0, defaults.V0, defaults.m0, defaults.n0, defaults.h0];
 				}
-				var endTime = 5 + (getValueById("ap_time") + getValueById("ap_spacing"))*getValueById("ap_no_pulse") + starting[0];
+				var endTime = Math.max(5 + (getValueById("ap_time") + getValueById("ap_spacing"))*getValueById("ap_no_pulse") + starting[0], 20);
 				var newPoints = integrate(starting[1], starting[2], starting[3], starting[4], starting[0], endTime, getValueById("ap_amplitude"), getValueById("ap_time"), getValueById("ap_spacing"), getValueById("ap_no_pulse"),
 					getValueById("ap_Na_o"), getValueById("ap_Na_i"), getValueById("ap_Na_g"), getValueById("ap_K_o"), getValueById("ap_K_i"), getValueById("ap_K_g"), 37, getValueById("ap_blockers"));
 				if (document.getElementById("ap_append").checked){
@@ -775,7 +776,7 @@
 				<button data-setVisible='main-menu' data-help="Return to the main menu to pick a different module.">Exit</button>
 			</div>
 			<canvas width=300 height=300 id='drawspaceap' data-help="Displays the membrane voltage, sodium and potassium conductances, and the applied stimulus on the graph."></canvas>
-			<div class="x-label">Distance (um)</div>		
+			<div class="x-label">Time (ms)</div>		
 			<div class="y-label">Voltage (mV)</div>	
 		</div>
 	</div>
